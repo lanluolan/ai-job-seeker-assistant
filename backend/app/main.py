@@ -1,0 +1,11 @@
+from fastapi import FastAPI
+from app.api.v1.router import api_router
+from app.db.init_db import init_db
+
+app = FastAPI(title="AI Job Assistant")
+app.include_router(api_router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
