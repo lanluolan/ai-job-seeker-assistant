@@ -10,12 +10,15 @@ from app.rag.vector_store import FaissVectorStore
 
 load_dotenv()
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "")
+RAG_CHAT_MODEL = os.getenv("OPENAI_MODEL", "mimo-v2-flash")
+
 client = OpenAI(
-    api_key="sk-c2ywj0n5rbrlc3kc5tevbiy7yb4txsfw8shey0sib5vpludx",
-    base_url="https://api.xiaomimimo.com/v1"
+    api_key=OPENAI_API_KEY,
+    base_url=OPENAI_BASE_URL or None,
 )
 
-RAG_CHAT_MODEL = os.getenv("OPENAI_MODEL", "mimo-v2-flash")
 INDEX_PATH = os.getenv("RAG_INDEX_PATH", "data/vector_index/jobs.faiss")
 METADATA_PATH = os.getenv("RAG_METADATA_PATH", "data/vector_index/jobs_meta.json")
 
