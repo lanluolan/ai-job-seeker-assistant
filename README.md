@@ -36,7 +36,8 @@ pip install -r requirements.txt
 3. 运行后端
 
 ```bash
-uvicorn backend.app.main:app --reload
+cd backend
+uvicorn app.main:app --reload
 ```
 
 4. 运行前端
