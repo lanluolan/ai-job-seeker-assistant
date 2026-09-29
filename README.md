@@ -54,6 +54,24 @@ npm run dev
 
 如果后端地址不同，将 `frontend/.env.example` 复制为 `frontend/.env.local`，修改 `API_PROXY_TARGET` 后重启前端。模型密钥仅保存在后端，不要放入前端环境变量。
 
+## 使用 Docker Compose
+
+也可以用 Docker 提供 Python 和 Node.js 运行环境，不必在电脑上安装它们。安装并启动 Docker Desktop 后，在项目根目录复制后端配置模板：
+
+```powershell
+Copy-Item backend/.env.example backend/.env
+```
+
+编辑 `backend/.env`，填入大模型服务商提供的密钥、API 地址和模型名，然后在项目根目录启动：
+
+```powershell
+docker compose up --build
+```
+
+打开 <http://127.0.0.1:5173>。前端和后端的代码目录会挂载进容器，修改代码后服务会自动重载；SQLite 数据库保存在 `backend/ai_job_assistant.db`。Compose 还会用 llama.cpp 的 CPU 容器启动 `Qwen3-Embedding-0.6B-GGUF:Q8_0`，OpenAI 兼容服务地址为 <http://127.0.0.1:11434/v1>。这是 Q8 量化的千问 0.6B Embedding 模型，约 639 MB，首次启动会自动下载，之后缓存在 Docker 卷 `embedding_models` 中。
+
+如果只修改了前端依赖，在项目根目录执行 `docker compose run --rm frontend npm install`，然后重新运行 `docker compose up`。停止开发环境使用 `docker compose down`；前端 Node.js 依赖和模型文件分别保存在 Compose 卷中。CPU 推理首次加载和每次冷启动会比 GPU 慢，但不需要 NVIDIA 显卡。模型加载完成后，可访问 <http://127.0.0.1:11434/health> 检查服务状态。
+
 ## 使用方式
 
 1. 在「我的简历」上传文件并提取文字，或直接粘贴简历。

@@ -1,0 +1,58 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    working_dir: /app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      EMBEDDING_BASE_URL: http://embedding:8080/v1
+      EMBEDDING_MODEL: qwen3-embedding-0.6b
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      embedding:
+        condition: service_started
+
+  embedding:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command:
+      - -hf
+      - Qwen/Qwen3-Embedding-0.6B-GGUF:Q8_0
+      - --embedding
+      - --pooling
+      - last
+      - --alias
+      - qwen3-embedding-0.6b
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+    ports:
+      - "127.0.0.1:11434:8080"
+    volumes:
+      - embedding_models:/root/.cache/llama.cpp
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      API_PROXY_TARGET: http://backend:8000
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  frontend_node_modules:
+  embedding_models:
